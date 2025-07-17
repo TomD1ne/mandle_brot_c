@@ -1,0 +1,11 @@
+{
+    "files.associations": {
+        "stdbool.h": "c",
+        "stdio.h": "c",
+        "graphics.h": "c",
+        "ios": "c",
+        "complex": "c",
+        "mandelbrot_types.h": "c",
+        "bitset": "c"
+    }
+}
