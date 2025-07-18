@@ -12,18 +12,20 @@ typedef struct
     double factor;
     double offset_x;
     double offset_y;
+    int width;
+    int height;
 } Zoom;
-
-typedef struct
-{
-    Point tl;
-    Point br;
-} Rectangle;
 
 typedef struct
 {
     int x;
     int y;
 } Point;
+
+typedef struct
+{
+    Point tl;
+    Point br;
+} Rectangle;
 
 #endif

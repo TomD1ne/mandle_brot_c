@@ -1,5 +1,4 @@
 #include "mandelbrot_iteration.h"
-#include "mandelbrot_types.h"
 
 int mandelbrot_iterations(Complex c, int max_iterations)
 {
@@ -16,10 +15,10 @@ int mandelbrot_iterations(Complex c, int max_iterations)
     return iterations;
 }
 
-Complex calculate_complex(int x, int y, int width, int height, Zoom z)
+Complex calculate_complex(int x, int y, Zoom *zoom)
 {
     Complex c;
-    c.real = (x - width / 2.0) / z.factor + z.offset_x;
-    c.imag = (y - height / 2.0) / z.factor + z.offset_y;
+    c.real = (x - zoom->width / 2.0) / zoom->factor + zoom->offset_x;
+    c.imag = (y - zoom->height / 2.0) / zoom->factor + zoom->offset_y;
     return c;
 }

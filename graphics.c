@@ -65,17 +65,8 @@ void graphics_present(Graphics *gfx)
     SDL_RenderPresent(gfx->renderer);
 }
 
-void graphics_draw_pixel(Graphics *gfx, int x, int y, int iterations, int max_iterations)
+void graphics_draw_pixel(Graphics *gfx, int x, int y, Color color)
 {
-    if (iterations == max_iterations)
-    {
-        SDL_SetRenderDrawColor(gfx->renderer, 0, 0, 0, 255); // Black for points in set
-    }
-    else
-    {
-        double log_iterations = log(iterations + 1) / log(max_iterations + 1);
-        int color = (int)(log_iterations * 255);
-        SDL_SetRenderDrawColor(gfx->renderer, 0, color / 2, color, 255);
-    }
+    SDL_SetRenderDrawColor(gfx->renderer, color.r, color.g, color.b, color.a);
     SDL_RenderDrawPoint(gfx->renderer, x, y);
 }

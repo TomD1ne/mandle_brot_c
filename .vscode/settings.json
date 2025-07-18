@@ -6,6 +6,13 @@
         "ios": "c",
         "complex": "c",
         "mandelbrot_types.h": "c",
-        "bitset": "c"
+        "bitset": "c",
+        "queue.h": "c",
+        "mandelbrot_iteration.h": "c",
+        "array": "c",
+        "string": "c",
+        "string_view": "c",
+        "vector": "c",
+        "pthread.h": "c"
     }
 }

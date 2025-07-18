@@ -5,39 +5,72 @@
 #include <stdio.h>
 #include <time.h>
 
-void screen_to_complex(int screen_x, int screen_y, int width, int height, Zoom *zoom, double *real, double *imag)
+void screen_to_complex(int screen_x, int screen_y, Zoom *zoom, double *real, double *imag)
 {
-    *real = (screen_x - width / 2.0) / zoom->factor + zoom->offset_x;
-    *imag = (screen_y - height / 2.0) / zoom->factor + zoom->offset_y;
+    *real = (screen_x - zoom->width / 2.0) / zoom->factor + zoom->offset_x;
+    *imag = (screen_y - zoom->height / 2.0) / zoom->factor + zoom->offset_y;
+}
+
+void color_madelbrot_pixel(Graphics *gfx, int x, int y, int iterations, int max_iterations)
+{
+    Color color;
+    if (iterations == max_iterations)
+    {
+        color = (Color){0, 0, 0, 255};
+    }
+    else
+    {
+        double log_iterations = log(iterations + 1) / log(max_iterations + 1);
+        int temp = (int)(log_iterations * 255);
+        color = (Color){0, temp / 2, temp, 255};
+    }
+    graphics_draw_pixel(gfx, x, y, color);
 }
 
 void render_mandelbrot(Graphics *gfx, Zoom *zoom, int max_iterations)
 {
-    clock_t start = clock();
-    int width = gfx->width;
-    int height = gfx->height;
-
-    printf("Rendering at zoom: %.0fx, offset: (%.6f, %.6f)",
-           zoom->factor, zoom->offset_x, zoom->offset_y);
-
-    graphics_clear(gfx);
-
-    for (int y = 0; y < height; y++)
-    {
-        for (int x = 0; x < width; x++)
-        {
-            Complex c;
-            c.real = (x - width / 2.0) / zoom->factor + zoom->offset_x;
-            c.imag = (y - height / 2.0) / zoom->factor + zoom->offset_y;
-
-            int iterations = mandelbrot_iterations(c, max_iterations);
-            graphics_draw_pixel(gfx, x, y, iterations, max_iterations);
-        }
-    }
+    int test_count = 34;
+    float best_time = 9999999;
+    int best_thread_count = 0;
+    float total_time = 0;
     clock_t end = clock();
-    float seconds = (float)(end - start) / CLOCKS_PER_SEC;
-    printf(" in %0.3f seconds\n", seconds);
-    graphics_present(gfx);
+
+    for (int i = 1; i < test_count; i++)
+    {
+        clock_t start = clock();
+        int width = gfx->width;
+        int height = gfx->height;
+
+        printf("Rendering at zoom: %.0fx, offset: (%.3f, %.3f)",
+               zoom->factor, zoom->offset_x, zoom->offset_y);
+
+        graphics_clear(gfx);
+
+        int *result = malloc(width * height * (sizeof(int)));
+        calculate_mandelbrot(*zoom, max_iterations, result, STANDARD, i);
+
+        for (int y = 0; y < height; y++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                color_madelbrot_pixel(gfx, x, y, result[x + y * width], max_iterations);
+            }
+        }
+
+        end = clock();
+        float seconds = (float)(end - start) / CLOCKS_PER_SEC;
+        total_time += seconds;
+        if (seconds < best_time)
+        {
+            best_time = seconds;
+            best_thread_count = i;
+        }
+        printf(" in %0.3f seconds with %i thread(s)\n", seconds, i);
+        graphics_present(gfx);
+    }
+
+    printf("Average rendering time: %0.3f\n", total_time / (test_count - 1));
+    printf("Best rendering time: %0.3f with %i thread(s) \n\n", best_time, best_thread_count);
 }
 
 int main(int argc, char *argv[])
@@ -50,7 +83,7 @@ int main(int argc, char *argv[])
     if (!gfx)
         return 1;
 
-    Zoom zoom = {200.0, -0.5, 0.0};
+    Zoom zoom = {200.0, -0.5, 0.0, WIDTH, HEIGHT};
 
     render_mandelbrot(gfx, &zoom, MAX_ITERATIONS);
 
@@ -78,7 +111,7 @@ int main(int argc, char *argv[])
                 if (e.button.button == SDL_BUTTON_LEFT)
                 {
                     double click_real, click_imag;
-                    screen_to_complex(e.button.x, e.button.y, WIDTH, HEIGHT, &zoom, &click_real, &click_imag);
+                    screen_to_complex(e.button.x, e.button.y, &zoom, &click_real, &click_imag);
 
                     zoom.offset_x = click_real;
                     zoom.offset_y = click_imag;
@@ -88,7 +121,7 @@ int main(int argc, char *argv[])
                 else if (e.button.button == SDL_BUTTON_RIGHT)
                 {
                     double click_real, click_imag;
-                    screen_to_complex(e.button.x, e.button.y, WIDTH, HEIGHT, &zoom, &click_real, &click_imag);
+                    screen_to_complex(e.button.x, e.button.y, &zoom, &click_real, &click_imag);
 
                     zoom.offset_x = click_real;
                     zoom.offset_y = click_imag;
