@@ -11,7 +11,7 @@ void calculate_mandelbrot(Zoom zoom, int max_iterations, int *result, enum Mandl
     switch (strategy)
     {
     case STANDARD:
-        calculate_mandlebrot_standard(zoom, max_iterations, result, num_threads, 16);
+        calculate_mandlebrot_standard(zoom, max_iterations, result, num_threads, 1);
         break;
     case FOUR_SPLIT:
         calculate_mandlebrot_four_split(zoom, max_iterations, result, num_threads);
