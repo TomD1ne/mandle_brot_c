@@ -17,29 +17,18 @@ int min(int a, int b)
     return (a < b) ? a : b;
 }
 
-void calculate_chunk(Rectangle *rectangle, int *result, Zoom *zoom, int max_iterations)
-{
-    for (int x = rectangle->tl.x; x < rectangle->br.x; x++)
-    {
-        for (int y = rectangle->tl.y; y < rectangle->br.y; y++)
-        {
-            Complex c = calculate_complex(x, y, zoom);
-            result[x + y * zoom->width] = mandelbrot_iterations(c, max_iterations);
-        }
-    }
-}
-
 void *thread_work(void *threadwork)
 {
-    ThreadWork *tw = (ThreadWork *)threadwork;
+    ThreadWork tw = *(ThreadWork *)threadwork;
     Rectangle *rectangle;
 
-    while (queue_pop_front(tw->q, (void **)&rectangle) == 0)
+    while (queue_pop_front(tw.q, (void **)&rectangle) == 0)
     {
-        calculate_chunk(rectangle, tw->result, tw->zoom, tw->max_iterations);
+        calculate_rect(*rectangle, tw.result, tw.zoom, tw.max_iterations);
         free(rectangle);
     }
-    return tw;
+
+    return NULL;
 }
 
 void calculate_mandlebrot_standard(Zoom zoom, int max_iterations, int *result, int num_threads, int lines_per_thread)

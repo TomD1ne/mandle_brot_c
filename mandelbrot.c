@@ -1,10 +1,7 @@
 #include "mandelbrot.h"
 #include "mandelbrot_standard.h"
+#include "mandelbrot_four_split.h"
 #include "mandelbrot_types.h"
-
-void calculate_mandlebrot_four_split(Zoom zoom, int max_iterations, int *result, int num_threads)
-{
-}
 
 void calculate_mandelbrot(Zoom zoom, int max_iterations, int *result, enum MandlebrotStrategy strategy, int num_threads)
 {

@@ -29,25 +29,34 @@ void color_madelbrot_pixel(Graphics *gfx, int x, int y, int iterations, int max_
 
 void render_mandelbrot(Graphics *gfx, Zoom *zoom, int max_iterations)
 {
-    int test_count = 34;
+    int test_count = 30;
     float best_time = 9999999;
     int best_thread_count = 0;
     float total_time = 0;
     clock_t end = clock();
 
+    int width = zoom->width;
+    int height = zoom->height;
+
     for (int i = 1; i < test_count; i++)
     {
         clock_t start = clock();
-        int width = gfx->width;
-        int height = gfx->height;
 
-        printf("Rendering at zoom: %.0fx, offset: (%.3f, %.3f)",
+        printf("Rendering at zoom: %.0fx, offset: (%.3f, %.3f) ",
                zoom->factor, zoom->offset_x, zoom->offset_y);
 
         graphics_clear(gfx);
 
+        clock_t start_iterating = clock();
+
         int *result = malloc(width * height * (sizeof(int)));
         calculate_mandelbrot(*zoom, max_iterations, result, STANDARD, i);
+
+        end = clock();
+        float seconds = (float)(end - start_iterating) / CLOCKS_PER_SEC;
+        // printf("Calculated mandlebrot in %0.3f seconds \n", seconds);
+
+        clock_t start_clouring = clock();
 
         for (int y = 0; y < height; y++)
         {
@@ -58,25 +67,30 @@ void render_mandelbrot(Graphics *gfx, Zoom *zoom, int max_iterations)
         }
 
         end = clock();
-        float seconds = (float)(end - start) / CLOCKS_PER_SEC;
+        seconds = (float)(end - start_clouring) / CLOCKS_PER_SEC;
+        // printf("Coloured mandlebrot in %0.3f seconds \n", seconds);
+
+        end = clock();
+        seconds = (float)(end - start) / CLOCKS_PER_SEC;
         total_time += seconds;
         if (seconds < best_time)
         {
             best_time = seconds;
             best_thread_count = i;
         }
-        printf(" in %0.3f seconds with %i thread(s)\n", seconds, i);
+        printf("rendered in %0.3f seconds with %i thread(s)\n", seconds, i);
         graphics_present(gfx);
     }
 
     printf("Average rendering time: %0.3f\n", total_time / (test_count - 1));
     printf("Best rendering time: %0.3f with %i thread(s) \n\n", best_time, best_thread_count);
+    // exit(0);
 }
 
 int main(int argc, char *argv[])
 {
-    const int WIDTH = 1024;
-    const int HEIGHT = 1024;
+    const int WIDTH = 800;
+    const int HEIGHT = 800;
     const int MAX_ITERATIONS = 1000;
 
     Graphics *gfx = graphics_init(WIDTH, HEIGHT, "Mandelbrot Set - Click to Zoom");

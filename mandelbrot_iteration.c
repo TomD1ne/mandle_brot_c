@@ -22,3 +22,15 @@ Complex calculate_complex(int x, int y, Zoom *zoom)
     c.imag = (y - zoom->height / 2.0) / zoom->factor + zoom->offset_y;
     return c;
 }
+
+void calculate_rect(Rectangle rect, int *result, Zoom *zoom, int max_iterations)
+{
+    for (int x = rect.tl.x; x < rect.br.x; x++)
+    {
+        for (int y = rect.tl.y; y < rect.br.y; y++)
+        {
+            Complex c = calculate_complex(x, y, zoom);
+            result[x + y * zoom->width] = mandelbrot_iterations(c, max_iterations);
+        }
+    }
+}

@@ -13,6 +13,7 @@
         "string": "c",
         "string_view": "c",
         "vector": "c",
-        "pthread.h": "c"
+        "pthread.h": "c",
+        "mandelbrot_four_split.h": "c"
     }
 }
