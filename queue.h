@@ -5,16 +5,16 @@
 
 typedef struct QueueItem
 {
+    void *data;
     struct QueueItem *prev;
     struct QueueItem *next;
-    void *data;
 } QueueItem;
 
 typedef struct
 {
+    pthread_mutex_t lock;
     QueueItem *head;
     QueueItem *tail;
-    pthread_mutex_t lock;
 } Queue;
 
 Queue *queue_init();

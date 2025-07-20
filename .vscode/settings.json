@@ -14,6 +14,8 @@
         "string_view": "c",
         "vector": "c",
         "pthread.h": "c",
-        "mandelbrot_four_split.h": "c"
+        "mandelbrot_four_split.h": "c",
+        "arm_neon.h": "c",
+        "stdint.h": "c"
     }
 }
