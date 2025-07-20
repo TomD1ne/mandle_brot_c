@@ -1,9 +1,9 @@
 #include "mandelbrot_iteration.h"
 
-int mandelbrot_iterations(Complex c, int max_iterations)
+uint16_t mandelbrot_iterations(Complex c, uint16_t max_iterations)
 {
     Complex z = {0.0, 0.0};
-    int iterations = 0;
+    uint16_t iterations = 0;
     while (z.real * z.real + z.imag * z.imag <= 4.0 && iterations < max_iterations)
     {
         double temp = z.real * z.real - z.imag * z.imag + c.real;
@@ -23,7 +23,7 @@ Complex calculate_complex(int x, int y, Zoom *zoom)
     return c;
 }
 
-void calculate_rect(Rectangle rect, int *result, Zoom *zoom, int max_iterations)
+void calculate_rect(Rectangle rect, uint16_t *result, Zoom *zoom, uint16_t max_iterations)
 {
     for (int x = rect.tl.x; x < rect.br.x; x++)
     {

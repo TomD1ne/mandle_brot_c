@@ -1,15 +1,15 @@
 #include "mandelbrot_iteration.h"
 #include "queue.h"
 #include <pthread.h>
-#include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 typedef struct
 {
     Queue *q;
-    int *result;
+    uint16_t *result;
     Zoom *zoom;
-    int max_iterations;
+    uint16_t max_iterations;
 } ThreadWork;
 
 int min(int a, int b)
@@ -17,7 +17,7 @@ int min(int a, int b)
     return (a < b) ? a : b;
 }
 
-void *thread_work(void *threadwork)
+void *thread_work_standard(void *threadwork)
 {
     ThreadWork tw = *(ThreadWork *)threadwork;
     Rectangle *rectangle;
@@ -31,7 +31,7 @@ void *thread_work(void *threadwork)
     return NULL;
 }
 
-void calculate_mandlebrot_standard(Zoom zoom, int max_iterations, int *result, int num_threads, int lines_per_thread)
+void calculate_mandelbrot_standard(Zoom zoom, uint16_t max_iterations, uint16_t *result, int thread_count, int lines_per_thread)
 {
     int num_of_lines = zoom.height / lines_per_thread + (zoom.height % lines_per_thread != 0);
     Queue *q = queue_init();
@@ -48,14 +48,14 @@ void calculate_mandlebrot_standard(Zoom zoom, int max_iterations, int *result, i
         }
     }
 
-    pthread_t threads[num_threads];
+    pthread_t threads[thread_count];
     ThreadWork tw = (ThreadWork){q, result, &zoom, max_iterations};
-    for (int i = 0; i < num_threads; i++)
+    for (int i = 0; i < thread_count; i++)
     {
-        pthread_create(&threads[i], NULL, thread_work, (void *)&tw);
+        pthread_create(&threads[i], NULL, thread_work_standard, (void *)&tw);
     }
 
-    for (int i = 0; i < num_threads; i++)
+    for (int i = 0; i < thread_count; i++)
     {
         pthread_join(threads[i], NULL);
     }

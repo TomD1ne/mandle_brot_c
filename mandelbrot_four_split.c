@@ -1,15 +1,14 @@
 #include "mandelbrot_iteration.h"
 #include "queue.h"
 #include <pthread.h>
-#include <stdlib.h>
 #include <stdio.h>
 
 typedef struct
 {
     Queue *q;
-    int *result;
+    uint16_t *result;
     Zoom *zoom;
-    int max_iterations;
+    uint16_t max_iterations;
     int *sem;
     pthread_mutex_t *sem_mutex;
 } ThreadWork;
@@ -31,7 +30,7 @@ void fill_empty_rect()
 {
 }
 
-void *thread_work(void *threadwork)
+void *thread_work_four_split(void *threadwork)
 {
     ThreadWork tw = *(ThreadWork *)threadwork;
     Rectangle *rectangle;
@@ -63,7 +62,7 @@ void *thread_work(void *threadwork)
     return NULL;
 }
 
-void calculate_four_split(Zoom zoom, int max_iterations, int *result, int num_threads)
+void calculate_mandelbrot_four_split(Zoom zoom, uint16_t max_iterations, uint16_t *result, int num_threads)
 {
     Queue *q = queue_init();
 
@@ -94,7 +93,7 @@ void calculate_four_split(Zoom zoom, int max_iterations, int *result, int num_th
     ThreadWork tw = (ThreadWork){q, result, &zoom, max_iterations, sem, &sem_mutex};
     for (int i = 0; i < num_threads; i++)
     {
-        pthread_create(&threads[i], NULL, thread_work, (void *)&tw);
+        pthread_create(&threads[i], NULL, thread_work_four_split, (void *)&tw);
     }
 
     for (int i = 0; i < num_threads; i++)

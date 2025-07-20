@@ -11,7 +11,7 @@ void screen_to_complex(int screen_x, int screen_y, Zoom *zoom, double *real, dou
     *imag = (screen_y - zoom->height / 2.0) / zoom->factor + zoom->offset_y;
 }
 
-void color_madelbrot_pixel(Graphics *gfx, int x, int y, int iterations, int max_iterations)
+void color_madelbrot_pixel(Graphics *gfx, int x, int y, int iterations, uint16_t max_iterations)
 {
     Color color;
     if (iterations == max_iterations)
@@ -21,13 +21,16 @@ void color_madelbrot_pixel(Graphics *gfx, int x, int y, int iterations, int max_
     else
     {
         double log_iterations = log(iterations + 1) / log(max_iterations + 1);
-        int temp = (int)(log_iterations * 255);
-        color = (Color){0, temp / 2, temp, 255};
+        int temp = (int)(log_iterations * 255 * 3);
+        int r = temp & ((1 << 8) - 1) << 16;
+        int g = temp & ((1 << 8) - 1) << 8;
+        int b = temp & ((1 << 8) - 1);
+        color = (Color){r, g, b, 255};
     }
     graphics_draw_pixel(gfx, x, y, color);
 }
 
-void render_mandelbrot(Graphics *gfx, Zoom *zoom, int max_iterations)
+void render_mandelbrot(Graphics *gfx, Zoom *zoom, uint16_t max_iterations)
 {
     int test_count = 30;
     float best_time = 9999999;
@@ -49,7 +52,7 @@ void render_mandelbrot(Graphics *gfx, Zoom *zoom, int max_iterations)
 
         clock_t start_iterating = clock();
 
-        int *result = malloc(width * height * (sizeof(int)));
+        uint16_t *result = malloc(width * height * (sizeof(uint16_t)));
         calculate_mandelbrot(*zoom, max_iterations, result, STANDARD, i);
 
         end = clock();
@@ -91,7 +94,7 @@ int main(int argc, char *argv[])
 {
     const int WIDTH = 800;
     const int HEIGHT = 800;
-    const int MAX_ITERATIONS = 1000;
+    const uint16_t MAX_ITERATIONS = 1000;
 
     Graphics *gfx = graphics_init(WIDTH, HEIGHT, "Mandelbrot Set - Click to Zoom");
     if (!gfx)
