@@ -34,14 +34,9 @@ int queue_pop_front(Queue *q, void **result)
     *result = item->data;
     q->head = item->prev;
 
-    if (item->prev == NULL)
+    if (q->tail == item)
     {
         q->tail = NULL;
-    }
-    else
-    {
-        QueueItem *prev_item = (QueueItem *)item->prev;
-        prev_item->next = NULL;
     }
 
     free(item);
@@ -64,15 +59,12 @@ void queue_push_back(Queue *q, void *data)
 
     if (q->tail == NULL)
     {
-        item->next = NULL;
         q->tail = item;
         q->head = item;
     }
     else
     {
-        QueueItem *next_item = q->tail;
-        next_item->prev = item;
-        item->next = next_item;
+        q->tail->prev = item;
         q->tail = item;
     }
 
