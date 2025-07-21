@@ -13,16 +13,13 @@ Queue *queue_init()
     q->head = NULL;
     q->tail = NULL;
     pthread_mutex_init(&q->lock, NULL);
+
     return q;
 }
 
 int queue_pop_front(Queue *q, void **result)
 {
-    if (pthread_mutex_lock(&q->lock) != 0)
-    {
-        printf("An error occured while locking the queue head\n");
-        return -1;
-    }
+    pthread_mutex_lock(&q->lock);
 
     if (q->head == NULL)
     {
@@ -32,7 +29,7 @@ int queue_pop_front(Queue *q, void **result)
 
     QueueItem *item = (QueueItem *)q->head;
     *result = item->data;
-    q->head = item->prev;
+    q->head = item->next;
 
     if (q->tail == item)
     {
@@ -46,16 +43,10 @@ int queue_pop_front(Queue *q, void **result)
 
 void queue_push_back(Queue *q, void *data)
 {
-
-    if (pthread_mutex_lock(&q->lock) != 0)
-    {
-        printf("An error occured while locking the queue tail\n");
-        return;
-    }
-
+    pthread_mutex_lock(&q->lock);
     QueueItem *item = malloc(sizeof(QueueItem));
     item->data = data;
-    item->prev = NULL;
+    item->next = NULL;
 
     if (q->tail == NULL)
     {
@@ -64,7 +55,7 @@ void queue_push_back(Queue *q, void *data)
     }
     else
     {
-        q->tail->prev = item;
+        q->tail->next = item;
         q->tail = item;
     }
 
@@ -76,7 +67,7 @@ void queue_destroy(Queue *q)
     while (q->head != NULL)
     {
         QueueItem *item = q->head;
-        q->head = item->prev;
+        q->head = item->next;
         free(item);
     }
     pthread_mutex_destroy(&q->lock);

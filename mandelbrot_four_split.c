@@ -17,12 +17,12 @@ typedef struct
     uint16_t max_rectangle_size;
 } ThreadWork;
 
-int rectangle_size(Rectangle rectangle)
+static inline int rectangle_size(Rectangle rectangle)
 {
     return (rectangle.br.x - rectangle.tl.x) * (rectangle.br.y - rectangle.tl.y);
 }
 
-bool rect_is_black(Rectangle rect, uint16_t *result, Zoom *zoom, uint16_t max_iterations)
+static inline bool rect_is_black(Rectangle rect, uint16_t *result, Zoom *zoom, uint16_t max_iterations)
 {
     for (int y = rect.tl.y; y < rect.br.y; y++)
     {
@@ -38,13 +38,14 @@ bool rect_is_black(Rectangle rect, uint16_t *result, Zoom *zoom, uint16_t max_it
     return true;
 }
 
-bool calculate_rect_border(Rectangle rect, uint16_t *result, Zoom *zoom, uint16_t max_iterations)
+static bool calculate_rect_border(Rectangle rect, uint16_t *result, Zoom *zoom, uint16_t max_iterations)
 {
     Rectangle nw = (Rectangle){{rect.tl.x, rect.tl.y}, {rect.br.x, rect.tl.y + 1}};
     Rectangle ne = (Rectangle){{rect.tl.x, rect.tl.y}, {rect.tl.x + 1, rect.br.y}};
     Rectangle sw = (Rectangle){{rect.tl.x, rect.br.y}, {rect.br.x, rect.br.y + 1}};
     Rectangle se = (Rectangle){{rect.br.x, rect.tl.y}, {rect.br.x + 1, rect.br.y}};
 
+    calculate_rect_with_period_check(nw, result, zoom, max_iterations);
     calculate_rect_with_period_check(nw, result, zoom, max_iterations);
     calculate_rect_with_period_check(ne, result, zoom, max_iterations);
     calculate_rect_with_period_check(sw, result, zoom, max_iterations);
@@ -58,7 +59,7 @@ bool calculate_rect_border(Rectangle rect, uint16_t *result, Zoom *zoom, uint16_
     return nw_black && ne_black && sw_black && se_black;
 }
 
-void split_rect(Queue *q, Rectangle rect2)
+static void split_rect(Queue *q, Rectangle rect2)
 {
     Rectangle rect = (Rectangle){{rect2.tl.x + 1, rect2.tl.y + 1}, {rect2.br.x, rect2.br.y}};
     Point mid = (Point){(rect.tl.x + (rect.br.x - rect.tl.x) / 2), (rect.tl.y + (rect.br.y - rect.tl.y) / 2)};
@@ -79,7 +80,7 @@ void split_rect(Queue *q, Rectangle rect2)
     queue_push_back(q, se);
 }
 
-void fill_black_rect(Rectangle rect, uint16_t *result, Zoom *zoom, uint16_t max_iterations)
+static inline void fill_black_rect(Rectangle rect, uint16_t *result, Zoom *zoom, uint16_t max_iterations)
 {
     for (int y = rect.tl.y; y < rect.br.y; y++)
     {
@@ -106,10 +107,11 @@ void *thread_work_four_split(void *threadwork)
                 return NULL;
             }
             pthread_mutex_unlock(tw.sem_mutex);
+            nanosleep(&(struct timespec){0, 100000}, NULL);
             continue;
         }
 
-        tw.sem++;
+        *tw.sem = *tw.sem + 1;
         pthread_mutex_unlock(tw.sem_mutex);
 
         if (rectangle_size(*rectangle) > tw.max_rectangle_size)
@@ -129,7 +131,7 @@ void *thread_work_four_split(void *threadwork)
         }
         free(rectangle);
         pthread_mutex_lock(tw.sem_mutex);
-        tw.sem--;
+        *tw.sem = *tw.sem - 1;
         pthread_mutex_unlock(tw.sem_mutex);
     }
 
