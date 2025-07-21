@@ -9,7 +9,7 @@
 typedef struct
 {
     Queue *q;
-    uint16_t *result;
+    float *result;
     Zoom *zoom;
     uint16_t max_iterations;
     int *sem;
@@ -22,13 +22,13 @@ static inline int rectangle_size(Rectangle rectangle)
     return (rectangle.br.x - rectangle.tl.x) * (rectangle.br.y - rectangle.tl.y);
 }
 
-static inline bool rect_is_black(Rectangle rect, uint16_t *result, Zoom *zoom, uint16_t max_iterations)
+static inline bool rect_is_black(Rectangle rect, float *result, Zoom *zoom, uint16_t max_iterations)
 {
     for (int y = rect.tl.y; y < rect.br.y; y++)
     {
         for (int x = rect.tl.x; x < rect.br.x; x++)
         {
-            if (result[x + y * zoom->width] != max_iterations)
+            if (result[x + y * zoom->width] != (float)max_iterations)
             {
                 return false;
             }
@@ -38,18 +38,18 @@ static inline bool rect_is_black(Rectangle rect, uint16_t *result, Zoom *zoom, u
     return true;
 }
 
-static bool calculate_rect_border(Rectangle rect, uint16_t *result, Zoom *zoom, uint16_t max_iterations)
+static bool calculate_rect_border(Rectangle rect, float *result, Zoom *zoom, uint16_t max_iterations)
 {
     Rectangle nw = (Rectangle){{rect.tl.x, rect.tl.y}, {rect.br.x, rect.tl.y + 1}};
     Rectangle ne = (Rectangle){{rect.tl.x, rect.tl.y}, {rect.tl.x + 1, rect.br.y}};
     Rectangle sw = (Rectangle){{rect.tl.x, rect.br.y}, {rect.br.x, rect.br.y + 1}};
     Rectangle se = (Rectangle){{rect.br.x, rect.tl.y}, {rect.br.x + 1, rect.br.y}};
 
-    calculate_rect_with_period_check(nw, result, zoom, max_iterations);
-    calculate_rect_with_period_check(nw, result, zoom, max_iterations);
-    calculate_rect_with_period_check(ne, result, zoom, max_iterations);
-    calculate_rect_with_period_check(sw, result, zoom, max_iterations);
-    calculate_rect_with_period_check(se, result, zoom, max_iterations);
+    calculate_rect_with_period_check_smooth(nw, result, zoom, max_iterations);
+    calculate_rect_with_period_check_smooth(nw, result, zoom, max_iterations);
+    calculate_rect_with_period_check_smooth(ne, result, zoom, max_iterations);
+    calculate_rect_with_period_check_smooth(sw, result, zoom, max_iterations);
+    calculate_rect_with_period_check_smooth(se, result, zoom, max_iterations);
 
     bool nw_black = rect_is_black(nw, result, zoom, max_iterations);
     bool ne_black = rect_is_black(ne, result, zoom, max_iterations);
@@ -80,13 +80,13 @@ static void split_rect(Queue *q, Rectangle rect2)
     queue_push_back(q, se);
 }
 
-static inline void fill_black_rect(Rectangle rect, uint16_t *result, Zoom *zoom, uint16_t max_iterations)
+static inline void fill_black_rect(Rectangle rect, float *result, Zoom *zoom, uint16_t max_iterations)
 {
     for (int y = rect.tl.y; y < rect.br.y; y++)
     {
         for (int x = rect.tl.x; x < rect.br.x; x++)
         {
-            result[x + y * zoom->width] = max_iterations;
+            result[x + y * zoom->width] = (float)max_iterations;
         }
     }
 }
@@ -127,7 +127,7 @@ void *thread_work_four_split(void *threadwork)
         }
         else
         {
-            calculate_rect_with_period_check(*rectangle, tw.result, tw.zoom, tw.max_iterations);
+            calculate_rect_with_period_check_smooth(*rectangle, tw.result, tw.zoom, tw.max_iterations);
         }
         free(rectangle);
         pthread_mutex_lock(tw.sem_mutex);
@@ -138,7 +138,7 @@ void *thread_work_four_split(void *threadwork)
     return NULL;
 }
 
-void calculate_mandelbrot_four_split(Zoom zoom, uint16_t max_iterations, uint16_t *result, uint16_t thread_count, uint16_t square_size)
+void calculate_mandelbrot_four_split(Zoom zoom, uint16_t max_iterations, float *result, uint16_t thread_count, uint16_t square_size)
 {
     Queue *q = queue_init();
 
@@ -147,7 +147,7 @@ void calculate_mandelbrot_four_split(Zoom zoom, uint16_t max_iterations, uint16_
     *sem = 0;
     pthread_mutex_init(&sem_mutex, NULL);
 
-    Rectangle init = (Rectangle){{-1, -1}, {zoom.width + 1, zoom.height + 1}};
+    Rectangle init = (Rectangle){{0, 0}, {zoom.width, zoom.height}};
     split_rect(q, init);
 
     pthread_t threads[thread_count];
@@ -166,7 +166,7 @@ void calculate_mandelbrot_four_split(Zoom zoom, uint16_t max_iterations, uint16_
     free(sem);
 }
 
-void calculate_mandelbrot_four_split_benchmark(Zoom zoom, uint16_t max_iterations, uint16_t *result, uint16_t thread_count)
+void calculate_mandelbrot_four_split_benchmark(Zoom zoom, uint16_t max_iterations, float *result, uint16_t thread_count)
 {
     printf("\n");
     float best_time = 9999999;

@@ -16,6 +16,7 @@
         "pthread.h": "c",
         "mandelbrot_four_split.h": "c",
         "arm_neon.h": "c",
-        "stdint.h": "c"
+        "stdint.h": "c",
+        "mandelbrot_standard.h": "c"
     }
 }

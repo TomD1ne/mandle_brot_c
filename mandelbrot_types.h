@@ -18,8 +18,8 @@ typedef struct
 
 typedef struct
 {
-    int x;
-    int y;
+    float x;
+    float y;
 } Point;
 
 typedef struct

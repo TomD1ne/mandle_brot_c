@@ -18,7 +18,7 @@ uint16_t mandelbrot_iterations(Complex c, uint16_t max_iterations)
     return iterations;
 }
 
-double mandelbrot_iterations_smooth(Complex c, uint16_t max_iterations)
+float mandelbrot_iterations_smooth(Complex c, uint16_t max_iterations)
 {
     Complex z = {0.0, 0.0};
     uint16_t iterations = 0;
@@ -51,14 +51,14 @@ Complex calculate_complex(int x, int y, Zoom *zoom)
     return c;
 }
 
-void calculate_rect(Rectangle rect, uint16_t *result, Zoom *zoom, uint16_t max_iterations)
+void calculate_rect(Rectangle rect, float *result, Zoom *zoom, uint16_t max_iterations)
 {
     for (int y = rect.tl.y; y < rect.br.y; y++)
     {
         for (int x = rect.tl.x; x < rect.br.x; x++)
         {
             Complex c = calculate_complex(x, y, zoom);
-            result[x + y * zoom->width] = mandelbrot_iterations(c, max_iterations);
+            result[x + y * zoom->width] = mandelbrot_iterations_smooth(c, max_iterations);
         }
     }
 }
@@ -134,8 +134,8 @@ void calculate_rect_simd_neon_double(Rectangle rect, uint16_t *result, Zoom *zoo
 
 void calculate_rect_with_period_check(Rectangle rect, uint16_t *result, Zoom *zoom, uint16_t max_iterations)
 {
-    const double center_x = zoom->width / 2.0;
-    const double center_y = zoom->height / 2.0;
+    const float center_x = zoom->width / 2.0;
+    const float center_y = zoom->height / 2.0;
     const double inv_factor = 1.0 / zoom->factor;
 
     for (int y = rect.tl.y; y < rect.br.y; y++)
@@ -183,8 +183,8 @@ void calculate_rect_with_period_check(Rectangle rect, uint16_t *result, Zoom *zo
     }
 }
 
-static inline double mandel_pixel(double cr, double ci,
-                                  uint16_t max_it, double eps_sq)
+static inline float mandel_pixel(double cr, double ci,
+                                 uint16_t max_it, double eps_sq)
 {
     double zr = 0.0, zi = 0.0;
     double old_zr = 0.0, old_zi = 0.0;
@@ -224,14 +224,14 @@ static inline double mandel_pixel(double cr, double ci,
     }
 
     if (i == max_it)
-        return (double)max_it;
+        return (float)max_it;
 
     double log_zn = log(zr * zr + zi * zi) / 2.0;
     double nu = log(log_zn / log(2.0)) / log(2.0);
-    return i + 1.0 - nu;
+    return (float)(i + 1.0 - nu);
 }
 
-void calculate_rect_with_period_check_smooth(Rectangle rect, uint16_t *result, Zoom *zoom, uint16_t max_iterations)
+void calculate_rect_with_period_check_smooth(Rectangle rect, float *result, Zoom *zoom, uint16_t max_iterations)
 {
     const double center_x = zoom->width / 2.0;
     const double center_y = zoom->height / 2.0;
@@ -249,7 +249,7 @@ void calculate_rect_with_period_check_smooth(Rectangle rect, uint16_t *result, Z
 
             double it = mandel_pixel(cr, ci, max_iterations, eps_sq);
 
-            double t = it / max_iterations;
+            float t = it / max_iterations;
 
             result[x + y * zoom->width] = t;
         }

@@ -10,6 +10,6 @@ enum MandlebrotStrategy
     FOUR_SPLIT, // iteratively split into four planes
 };
 
-void calculate_mandelbrot(Zoom z, uint16_t max_iterations, uint16_t *result, enum MandlebrotStrategy strategy, int thread_count);
+void calculate_mandelbrot(Zoom z, uint16_t max_iterations, float *result, enum MandlebrotStrategy strategy, int thread_count);
 
 #endif

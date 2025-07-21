@@ -11,46 +11,50 @@ static inline void screen_to_complex(int screen_x, int screen_y, Zoom *zoom, dou
     *imag = (screen_y - zoom->height / 2.0) / zoom->factor + zoom->offset_y;
 }
 
+static inline Point_Color calc_color(float iterations, uint16_t max_iterations)
+{
+    if (iterations == max_iterations)
+    {
+        return (Point_Color){0.0, 0.0, 0.0, 1.0};
+    }
+
+    float t = iterations / max_iterations;
+
+    float r = 0.5f + 0.5f * sin(3.0f + t * 12.0f);
+    float g = 0.5f + 0.5f * sin(2.1f + t * 12.0f);
+    float b = 0.5f + 0.5f * sin(1.0f + t * 12.0f);
+
+    double brightness = pow(t, 0.3);
+    r *= brightness;
+    g *= brightness;
+    b *= brightness;
+
+    return (Point_Color){r, g, b, 1.0f};
+}
+
 void init_palette(uint16_t max_iterations, Point_Color *palette)
 {
     for (uint16_t i = 0; i <= max_iterations; ++i)
     {
-        if (i == max_iterations)
-        {
-            palette[i] = (Point_Color){0.0f, 0.0f, 0.0f, 1.0f};
-            continue;
-        }
-
-        double t = (double)i / max_iterations;
-
-        float r = 0.5f + 0.5f * sin(3.0f + t * 12.0f);
-        float g = 0.5f + 0.5f * sin(2.1f + t * 12.0f);
-        float b = 0.5f + 0.5f * sin(1.0f + t * 12.0f);
-
-        double brightness = pow(t, 0.3);
-        r *= brightness;
-        g *= brightness;
-        b *= brightness;
-
-        palette[i] = (Point_Color){r, g, b, 1.0f};
+        palette[i] = calc_color((float)i, max_iterations);
     }
 }
 
-void render_mandelbrot(Graphics *gfx, Zoom *zoom, uint16_t max_iterations, Point_Color *palette, uint16_t thread_count)
+void render_mandelbrot(Graphics *gfx, Zoom *zoom, uint16_t max_iterations, uint16_t thread_count)
 {
     int width = zoom->width;
     int height = zoom->height;
 
     graphics_clear(gfx);
 
-    uint16_t *result = malloc(width * height * (sizeof(uint16_t)));
+    float *result = malloc(width * height * (sizeof(float)));
     calculate_mandelbrot(*zoom, max_iterations, result, FOUR_SPLIT, thread_count);
 
     for (int y = 0; y < height; y++)
     {
         for (int x = 0; x < width; x++)
         {
-            Point_Color color = palette[result[x + y * width]];
+            Point_Color color = calc_color(result[x + y * width], max_iterations);
             Graphics_Point *p = &gfx->points[gfx->point_count];
             p->x = (float)x;
             p->y = (float)y;
@@ -67,7 +71,7 @@ void render_mandelbrot(Graphics *gfx, Zoom *zoom, uint16_t max_iterations, Point
     free(result);
 }
 
-void render_mandelbrot_benchmark(Graphics *gfx, Zoom *zoom, uint16_t max_iterations, Point_Color *palette, int test_count)
+void render_mandelbrot_benchmark(Graphics *gfx, Zoom *zoom, uint16_t max_iterations, int test_count)
 {
     float best_time = 9999999;
     int best_thread_count = 0;
@@ -86,17 +90,17 @@ void render_mandelbrot_benchmark(Graphics *gfx, Zoom *zoom, uint16_t max_iterati
 
         graphics_clear(gfx);
 
-        uint16_t *result = malloc(width * height * (sizeof(uint16_t)));
+        float *result = malloc(width * height * (sizeof(double)));
         calculate_mandelbrot(*zoom, max_iterations, result, FOUR_SPLIT, i);
 
         for (int y = 0; y < height; y++)
         {
             for (int x = 0; x < width; x++)
             {
-                Point_Color color = palette[result[x + y * width]];
+                Point_Color color = calc_color(result[x + y * width], max_iterations);
                 Graphics_Point *p = &gfx->points[gfx->point_count];
-                p->x = (float)x;
-                p->y = (float)y;
+                p->x = x;
+                p->y = y;
                 p->r = color.r;
                 p->g = color.g;
                 p->b = color.b;
@@ -131,11 +135,10 @@ int main()
 {
     const int WIDTH = 1300;
     const int HEIGHT = 950;
-    const int thread_count = 1;
     const uint16_t MAX_ITERATIONS = 1000;
 
-    Point_Color palette[MAX_ITERATIONS + 1];
-    init_palette(MAX_ITERATIONS, palette);
+    // Point_Color palette[MAX_ITERATIONS + 1];
+    // init_palette(MAX_ITERATIONS, palette);
 
     Graphics *gfx = graphics_init(WIDTH, HEIGHT, "Mandelbrot Set - Click to Zoom");
     if (!gfx)
@@ -145,7 +148,7 @@ int main()
 
     Zoom zoom = {200.0, -0.5, 0.0, WIDTH, HEIGHT};
 
-    render_mandelbrot_benchmark(gfx, &zoom, MAX_ITERATIONS, palette, 2);
+    render_mandelbrot_benchmark(gfx, &zoom, MAX_ITERATIONS, 2);
 
     printf("Controls:\n");
     printf("- Left click: Zoom in at cursor position\n");
@@ -209,7 +212,7 @@ int main()
 
         if (needs_redraw)
         {
-            render_mandelbrot_benchmark(gfx, &zoom, MAX_ITERATIONS, palette, 2);
+            render_mandelbrot_benchmark(gfx, &zoom, MAX_ITERATIONS, 2);
 
             needs_redraw = 0;
         }

@@ -7,7 +7,7 @@
 typedef struct
 {
     Queue *q;
-    uint16_t *result;
+    float *result;
     Zoom *zoom;
     uint16_t max_iterations;
 } ThreadWork;
@@ -24,14 +24,14 @@ void *thread_work_standard(void *threadwork)
 
     while (queue_pop_front(tw.q, (void **)&rectangle) == 0)
     {
-        calculate_rect_with_period_check(*rectangle, tw.result, tw.zoom, tw.max_iterations);
+        calculate_rect_with_period_check_smooth(*rectangle, tw.result, tw.zoom, tw.max_iterations);
         free(rectangle);
     }
 
     return NULL;
 }
 
-void calculate_mandelbrot_standard(Zoom zoom, uint16_t max_iterations, uint16_t *result, int thread_count, int lines_per_thread)
+void calculate_mandelbrot_standard(Zoom zoom, uint16_t max_iterations, float *result, int thread_count, int lines_per_thread)
 {
     int num_of_lines = zoom.height / lines_per_thread + (zoom.height % lines_per_thread != 0);
     Queue *q = queue_init();

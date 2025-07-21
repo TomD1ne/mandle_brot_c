@@ -4,7 +4,7 @@
 #include "mandelbrot_types.h"
 #include <stdlib.h>
 
-void calculate_mandelbrot(Zoom zoom, uint16_t max_iterations, uint16_t *result, enum MandlebrotStrategy strategy, int thread_count)
+void calculate_mandelbrot(Zoom zoom, uint16_t max_iterations, float *result, enum MandlebrotStrategy strategy, int thread_count)
 {
     switch (strategy)
     {
