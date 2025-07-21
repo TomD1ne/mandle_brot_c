@@ -172,7 +172,7 @@ void calculate_mandelbrot_four_split_benchmark(Zoom zoom, uint16_t max_iteration
     float best_time = 9999999;
     int best_square_size = 0;
 
-    for (uint16_t square_size = 0; square_size <= 1024; square_size += 1)
+    for (uint16_t square_size = 2; square_size <= 20000; square_size *= 2)
     {
         clock_t start = clock();
         calculate_mandelbrot_four_split(zoom, max_iterations, result, thread_count, square_size);
@@ -184,7 +184,7 @@ void calculate_mandelbrot_four_split_benchmark(Zoom zoom, uint16_t max_iteration
             best_time = seconds;
             best_square_size = square_size;
         }
-        printf("rendered in %0.3f seconds with square size %i\n", seconds, square_size);
+        // printf("rendered in %0.3f seconds with square size %i\n", seconds, square_size);
     }
 
     printf("Best rendering time: %0.3f with square_size %i\n\n", best_time, best_square_size);

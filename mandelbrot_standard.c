@@ -33,16 +33,16 @@ void *thread_work_standard(void *threadwork)
 
 void calculate_mandelbrot_standard(Zoom zoom, uint16_t max_iterations, uint16_t *result, int thread_count, int lines_per_thread)
 {
-    int num_of_lines = zoom.height / lines_per_thread + (zoom.height % lines_per_thread != 0);
+    int num_of_rects = zoom.height / lines_per_thread + (zoom.height % lines_per_thread != 0);
     Queue *q = queue_init();
 
-    for (int c = 0; c < num_of_lines; c++)
+    for (int r = 0; r < num_of_rects; r++)
     {
         Rectangle *rectangle = malloc(sizeof(Rectangle));
         if (rectangle != NULL)
         {
-            Point tl = (Point){0, c * num_of_lines};
-            Point br = (Point){zoom.width - 1, min(tl.y + num_of_lines, zoom.height)};
+            Point tl = (Point){0, r * lines_per_thread};
+            Point br = (Point){zoom.width - 1, min(tl.y + lines_per_thread, zoom.height)};
             *rectangle = (Rectangle){tl, br};
             queue_push_back(q, rectangle);
         }

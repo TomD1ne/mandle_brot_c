@@ -9,10 +9,10 @@ void calculate_mandelbrot(Zoom zoom, uint16_t max_iterations, uint16_t *result, 
     switch (strategy)
     {
     case STANDARD:
-        calculate_mandelbrot_standard(zoom, max_iterations, result, thread_count, 1);
+        calculate_mandelbrot_standard(zoom, max_iterations, result, thread_count, 100);
         break;
     case FOUR_SPLIT:
-        calculate_mandelbrot_four_split(zoom, max_iterations, result, thread_count, 111);
+        calculate_mandelbrot_four_split(zoom, max_iterations, result, thread_count, 110);
         break;
     default:
         break;

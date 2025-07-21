@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
+#include <unistd.h>
 
 static inline void screen_to_complex(int screen_x, int screen_y, Zoom *zoom, double *real, double *imag)
 {
@@ -36,7 +37,7 @@ void init_palette(uint16_t max_iterations, Point_Color *palette)
     }
 }
 
-void render_mandelbrot(Graphics *gfx, Zoom *zoom, uint16_t max_iterations, Point_Color *palette, uint16_t thread_count)
+void render_mandelbrot(Graphics *gfx, Zoom *zoom, uint16_t max_iterations, Point_Color *palette, uint16_t thread_count, enum MandlebrotStrategy strategy)
 {
     int width = zoom->width;
     int height = zoom->height;
@@ -44,7 +45,7 @@ void render_mandelbrot(Graphics *gfx, Zoom *zoom, uint16_t max_iterations, Point
     graphics_clear(gfx);
 
     uint16_t *result = malloc(width * height * (sizeof(uint16_t)));
-    calculate_mandelbrot(*zoom, max_iterations, result, FOUR_SPLIT, thread_count);
+    calculate_mandelbrot(*zoom, max_iterations, result, strategy, thread_count);
 
     for (int y = 0; y < height; y++)
     {
@@ -67,19 +68,20 @@ void render_mandelbrot(Graphics *gfx, Zoom *zoom, uint16_t max_iterations, Point
     free(result);
 }
 
-void render_mandelbrot_benchmark(Graphics *gfx, Zoom *zoom, uint16_t max_iterations, Point_Color *palette, int test_count)
+void render_mandelbrot_benchmark(Graphics *gfx, Zoom *zoom, uint16_t max_iterations, Point_Color *palette, int test_count, enum MandlebrotStrategy strategy)
 {
     float best_time = 9999999;
     int best_thread_count = 0;
     float total_time = 0;
-    clock_t end = clock();
 
     int width = zoom->width;
     int height = zoom->height;
 
+    struct timespec start, end;
+
     for (int i = 1; i < test_count; i++)
     {
-        clock_t start = clock();
+        clock_gettime(CLOCK_MONOTONIC, &start);
 
         printf("Rendering at zoom: %.0fx, offset: (%.3f, %.3f) ",
                zoom->factor, zoom->offset_x, zoom->offset_y);
@@ -87,7 +89,7 @@ void render_mandelbrot_benchmark(Graphics *gfx, Zoom *zoom, uint16_t max_iterati
         graphics_clear(gfx);
 
         uint16_t *result = malloc(width * height * (sizeof(uint16_t)));
-        calculate_mandelbrot(*zoom, max_iterations, result, FOUR_SPLIT, i);
+        calculate_mandelbrot(*zoom, max_iterations, result, strategy, i);
 
         for (int y = 0; y < height; y++)
         {
@@ -107,9 +109,9 @@ void render_mandelbrot_benchmark(Graphics *gfx, Zoom *zoom, uint16_t max_iterati
         }
 
         graphics_present(gfx);
-
-        end = clock();
-        float seconds = (float)(end - start) / CLOCKS_PER_SEC;
+        // sleep(1);
+        clock_gettime(CLOCK_MONOTONIC, &end);
+        float seconds = (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / 1e9;
         total_time += seconds;
         if (seconds < best_time)
         {
@@ -129,9 +131,10 @@ void render_mandelbrot_benchmark(Graphics *gfx, Zoom *zoom, uint16_t max_iterati
 
 int main()
 {
-    const int WIDTH = 1300;
-    const int HEIGHT = 950;
-    const int thread_count = 1;
+    const int WIDTH = 800;
+    const int HEIGHT = 800;
+    const int thread_count = 10;
+    const int test_count = 30;
     const uint16_t MAX_ITERATIONS = 1000;
 
     Point_Color palette[MAX_ITERATIONS + 1];
@@ -143,9 +146,9 @@ int main()
 
     graphics_reserve_points(gfx, WIDTH * HEIGHT);
 
-    Zoom zoom = {200.0, -0.5, 0.0, WIDTH, HEIGHT};
+    Zoom zoom = {200.0, -0.500, 0.0, WIDTH, HEIGHT};
 
-    render_mandelbrot_benchmark(gfx, &zoom, MAX_ITERATIONS, palette, 2);
+    render_mandelbrot(gfx, &zoom, MAX_ITERATIONS, palette, test_count, FOUR_SPLIT);
 
     printf("Controls:\n");
     printf("- Left click: Zoom in at cursor position\n");
@@ -209,8 +212,7 @@ int main()
 
         if (needs_redraw)
         {
-            render_mandelbrot_benchmark(gfx, &zoom, MAX_ITERATIONS, palette, 2);
-
+            render_mandelbrot(gfx, &zoom, MAX_ITERATIONS, palette, thread_count, FOUR_SPLIT);
             needs_redraw = 0;
         }
 
