@@ -27,9 +27,9 @@ Complex calculate_complex(int x, int y, Zoom *zoom)
 
 void calculate_rect(Rectangle rect, uint16_t *result, Zoom *zoom, uint16_t max_iterations)
 {
-    for (int x = rect.tl.x; x < rect.br.x; x++)
+    for (int y = rect.tl.y; y < rect.br.y; y++)
     {
-        for (int y = rect.tl.y; y < rect.br.y; y++)
+        for (int x = rect.tl.x; x < rect.br.x; x++)
         {
             Complex c = calculate_complex(x, y, zoom);
             result[x + y * zoom->width] = mandelbrot_iterations(c, max_iterations);

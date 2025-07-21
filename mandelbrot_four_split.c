@@ -24,9 +24,9 @@ int rectangle_size(Rectangle rectangle)
 
 bool rect_is_black(Rectangle rect, uint16_t *result, Zoom *zoom, uint16_t max_iterations)
 {
-    for (int x = rect.tl.x; x < rect.br.x; x++)
+    for (int y = rect.tl.y; y < rect.br.y; y++)
     {
-        for (int y = rect.tl.y; y < rect.br.y; y++)
+        for (int x = rect.tl.x; x < rect.br.x; x++)
         {
             if (result[x + y * zoom->width] != max_iterations)
             {
@@ -81,9 +81,9 @@ void split_rect(Queue *q, Rectangle rect2)
 
 void fill_black_rect(Rectangle rect, uint16_t *result, Zoom *zoom, uint16_t max_iterations)
 {
-    for (int x = rect.tl.x; x < rect.br.x; x++)
+    for (int y = rect.tl.y; y < rect.br.y; y++)
     {
-        for (int y = rect.tl.y; y < rect.br.y; y++)
+        for (int x = rect.tl.x; x < rect.br.x; x++)
         {
             result[x + y * zoom->width] = max_iterations;
         }
