@@ -23,18 +23,14 @@ void init_palette(uint16_t max_iterations, Point_Color *palette)
 
         double t = (double)i / max_iterations;
 
-        double freq1 = 2.0 * M_PI * t;
-        double freq2 = 4.0 * M_PI * t;
-        double freq3 = 6.0 * M_PI * t;
-
-        float r = 0.5 + 0.5 * sin(freq1 + 0.0);
-        float g = 0.5 + 0.5 * sin(freq2 + 2.094);
-        float b = 0.5 + 0.5 * sin(freq3 + 4.188);
+        float r = 0.5f + 0.5f * sin(3.0f + t * 12.0f);
+        float g = 0.5f + 0.5f * sin(2.1f + t * 12.0f);
+        float b = 0.5f + 0.5f * sin(1.0f + t * 12.0f);
 
         double brightness = pow(t, 0.3);
-        r = r * brightness;
-        g = g * brightness;
-        b = b * brightness;
+        r *= brightness;
+        g *= brightness;
+        b *= brightness;
 
         palette[i] = (Point_Color){r, g, b, 1.0f};
     }
@@ -133,8 +129,8 @@ void render_mandelbrot_benchmark(Graphics *gfx, Zoom *zoom, uint16_t max_iterati
 
 int main()
 {
-    const int WIDTH = 800;
-    const int HEIGHT = 800;
+    const int WIDTH = 1300;
+    const int HEIGHT = 950;
     const int thread_count = 1;
     const uint16_t MAX_ITERATIONS = 1000;
 
