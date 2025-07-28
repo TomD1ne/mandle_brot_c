@@ -116,6 +116,8 @@ void calculate_rect_with_period_check(Rectangle rect, uint16_t *result, Zoom *zo
     const double center_y = zoom->height / 2.0;
     const double inv_factor = 1.0 / zoom->factor;
 
+    if ()
+
     for (int y = rect.tl.y; y < rect.br.y; y++)
     {
         const double c_imag = (y - center_y) * inv_factor + zoom->offset_y;
