@@ -1,4 +1,5 @@
 #include "mandelbrot_types.h"
+#include <stdint.h>
 
 #ifndef MANDELBROT_STANDARD_H
 #define MANDELBROT_STANDARD_H

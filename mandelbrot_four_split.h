@@ -1,4 +1,5 @@
 #include "mandelbrot_types.h"
+#include <stdint.h>
 
 #ifndef MANDELBROT_FOUR_SPLIT_H
 #define MANDELBROT_FOUR_SPLIT_H

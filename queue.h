@@ -14,7 +14,6 @@ typedef struct
     pthread_mutex_t lock;
     QueueItem *head;
     QueueItem *tail;
-    // pthread_cond_t *cond;
 } Queue;
 
 Queue *queue_init();

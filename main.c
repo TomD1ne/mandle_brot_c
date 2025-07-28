@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <time.h>
 #include <unistd.h>
+#include <stdint.h>
 
 static inline void screen_to_complex(int screen_x, int screen_y, Zoom *zoom, double *real, double *imag)
 {
