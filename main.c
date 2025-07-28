@@ -6,6 +6,7 @@
 #include <tgmath.h>
 #include <time.h>
 #include <unistd.h>
+#include <stdint.h>
 #include <SDL.h>
 
 static void screen_to_complex(const int screen_x, const int screen_y, const Zoom *zoom, double *real, double *imag)

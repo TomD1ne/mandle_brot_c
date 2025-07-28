@@ -5,6 +5,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include <time.h>
+#include <stdint.h>
 
 typedef struct
 {

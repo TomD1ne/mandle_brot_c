@@ -1,5 +1,7 @@
 #include "mandelbrot_iteration.h"
-#include <arm_neon.h>
+#ifdef __APPLE__
+    #include <arm_neon.h>
+#endif
 #include <stdint.h>
 
 uint16_t mandelbrot_iterations(Complex c, uint16_t max_iterations)
@@ -37,6 +39,7 @@ void calculate_rect(Rectangle rect, uint16_t *result, Zoom *zoom, uint16_t max_i
     }
 }
 
+#ifdef __APPLE__
 void calculate_rect_simd_neon_double(Rectangle rect, uint16_t *result, Zoom *zoom, uint16_t max_iterations)
 {
     const double center_x = zoom->width / 2.0;
@@ -105,12 +108,15 @@ void calculate_rect_simd_neon_double(Rectangle rect, uint16_t *result, Zoom *zoo
         }
     }
 }
+#endif
 
 void calculate_rect_with_period_check(Rectangle rect, uint16_t *result, Zoom *zoom, uint16_t max_iterations)
 {
     const double center_x = zoom->width / 2.0;
     const double center_y = zoom->height / 2.0;
     const double inv_factor = 1.0 / zoom->factor;
+
+    if ()
 
     for (int y = rect.tl.y; y < rect.br.y; y++)
     {

@@ -3,6 +3,7 @@
 #include <pthread.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdint.h>
 
 typedef struct
 {
