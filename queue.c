@@ -1,8 +1,6 @@
 #include "queue.h"
 #include <pthread.h>
-#include <stdbool.h>
 #include <stdlib.h>
-#include <stdio.h>
 
 Queue *queue_init()
 {
@@ -27,7 +25,7 @@ int queue_pop_front(Queue *q, void **result)
         return -1;
     }
 
-    QueueItem *item = (QueueItem *)q->head;
+    QueueItem *item = q->head;
     *result = item->data;
     q->head = item->next;
 

@@ -4,13 +4,13 @@
 #endif
 #include <stdint.h>
 
-uint16_t mandelbrot_iterations(Complex c, uint16_t max_iterations)
+uint16_t mandelbrot_iterations(const Complex c, const uint16_t max_iterations)
 {
     Complex z = {0.0, 0.0};
     uint16_t iterations = 0;
     while (z.real * z.real + z.imag * z.imag <= 4.0 && iterations < max_iterations)
     {
-        double temp = z.real * z.real - z.imag * z.imag + c.real;
+        const double temp = z.real * z.real - z.imag * z.imag + c.real;
         z.imag = 2.0 * z.real * z.imag + c.imag;
         z.real = temp;
         iterations++;
@@ -19,7 +19,7 @@ uint16_t mandelbrot_iterations(Complex c, uint16_t max_iterations)
     return iterations;
 }
 
-Complex calculate_complex(int x, int y, Zoom *zoom)
+Complex calculate_complex(const int x, const int y, const Zoom *zoom)
 {
     Complex c;
     c.real = (x - zoom->width / 2.0) / zoom->factor + zoom->offset_x;
@@ -27,20 +27,20 @@ Complex calculate_complex(int x, int y, Zoom *zoom)
     return c;
 }
 
-void calculate_rect(Rectangle rect, uint16_t *result, Zoom *zoom, uint16_t max_iterations)
+void calculate_rect(const Rectangle rect, uint16_t *result, const Zoom *zoom, const uint16_t max_iterations)
 {
     for (int y = rect.tl.y; y < rect.br.y; y++)
     {
         for (int x = rect.tl.x; x < rect.br.x; x++)
         {
-            Complex c = calculate_complex(x, y, zoom);
+            const Complex c = calculate_complex(x, y, zoom);
             result[x + y * zoom->width] = mandelbrot_iterations(c, max_iterations);
         }
     }
 }
 
 #ifdef __APPLE__
-void calculate_rect_simd_neon_double(Rectangle rect, uint16_t *result, Zoom *zoom, uint16_t max_iterations)
+void calculate_rect_simd_neon_double(const Rectangle rect, uint16_t *result, Zoom *zoom, const uint16_t max_iterations)
 {
     const double center_x = zoom->width / 2.0;
     const double center_y = zoom->height / 2.0;
@@ -110,13 +110,11 @@ void calculate_rect_simd_neon_double(Rectangle rect, uint16_t *result, Zoom *zoo
 }
 #endif
 
-void calculate_rect_with_period_check(Rectangle rect, uint16_t *result, Zoom *zoom, uint16_t max_iterations)
+void calculate_rect_with_period_check(const Rectangle rect, uint16_t *result, const Zoom *zoom, const uint16_t max_iterations)
 {
     const double center_x = zoom->width / 2.0;
     const double center_y = zoom->height / 2.0;
     const double inv_factor = 1.0 / zoom->factor;
-
-    if ()
 
     for (int y = rect.tl.y; y < rect.br.y; y++)
     {

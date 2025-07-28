@@ -1,3 +1,4 @@
+#pragma once
 #include "mandelbrot_types.h"
 #include <stdint.h>
 

@@ -2,10 +2,9 @@
 #include "mandelbrot_standard.h"
 #include "mandelbrot_four_split.h"
 #include "mandelbrot_types.h"
-#include <stdlib.h>
 #include <stdint.h>
 
-void calculate_mandelbrot(Zoom zoom, uint16_t max_iterations, uint16_t *result, enum MandlebrotStrategy strategy, int thread_count)
+void calculate_mandelbrot(const Zoom zoom, const uint16_t max_iterations, uint16_t *result, const enum MandelbrotStrategy strategy, const int thread_count)
 {
     switch (strategy)
     {

@@ -1,17 +1,9 @@
 #include "graphics.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#ifdef __APPLE__
-    #include <OpenGL/gl.h>
-#else
-#ifdef _WIN32
-  #include <windows.h>
-#endif
-    #include <GL/gl.h>
-#endif
+#include <OpenGL/gl.h>
 
-Graphics *graphics_init(int width, int height, const char *title)
+Graphics *graphics_init(const int width, const int height, const char *title)
 {
     Graphics *gfx = malloc(sizeof(Graphics));
     if (!gfx)
@@ -53,7 +45,7 @@ Graphics *graphics_init(int width, int height, const char *title)
     }
 
     glViewport(0, 0, width, height);
-    glEnable(GL_PROGRAM_POINT_SIZE);
+    glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
 
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();

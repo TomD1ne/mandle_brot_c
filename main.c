@@ -40,7 +40,7 @@ void init_palette(const uint16_t max_iterations, Point_Color *palette)
     }
 }
 
-void render_mandelbrot(Graphics *gfx, const Zoom *zoom, const uint16_t max_iterations, const Point_Color *palette, uint16_t thread_count, enum MandlebrotStrategy strategy)
+void render_mandelbrot(Graphics *gfx, const Zoom *zoom, const uint16_t max_iterations, const Point_Color *palette, uint16_t thread_count, enum MandelbrotStrategy strategy)
 {
     const int width = zoom->width;
     const int height = zoom->height;
@@ -71,7 +71,7 @@ void render_mandelbrot(Graphics *gfx, const Zoom *zoom, const uint16_t max_itera
     free(result);
 }
 
-void render_mandelbrot_benchmark(Graphics *gfx, const Zoom *zoom, uint16_t max_iterations, const Point_Color *palette, int test_count, enum MandlebrotStrategy strategy)
+void render_mandelbrot_benchmark(Graphics *gfx, const Zoom *zoom, uint16_t max_iterations, const Point_Color *palette, int test_count, enum MandelbrotStrategy strategy)
 {
     double best_time = 9999999;
     int best_thread_count = 0;
@@ -134,8 +134,8 @@ void render_mandelbrot_benchmark(Graphics *gfx, const Zoom *zoom, uint16_t max_i
 
 int main()
 {
-    const int WIDTH = 800;
-    const int HEIGHT = 800;
+    const int WIDTH = 1430;
+    const int HEIGHT = 850;
     const int thread_count = 10;
     const int test_count = 30;
     const uint16_t MAX_ITERATIONS = 1000;

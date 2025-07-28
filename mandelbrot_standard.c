@@ -2,8 +2,8 @@
 #include "queue.h"
 #include <pthread.h>
 #include <stdio.h>
-#include <string.h>
 #include <stdint.h>
+#include <stdlib.h>
 
 typedef struct
 {
@@ -13,14 +13,14 @@ typedef struct
     uint16_t max_iterations;
 } ThreadWork;
 
-static inline int min(int a, int b)
+static int min(int a, int b)
 {
-    return (a < b) ? a : b;
+    return a < b ? a : b;
 }
 
 void *thread_work_standard(void *threadwork)
 {
-    ThreadWork tw = *(ThreadWork *)threadwork;
+    const ThreadWork tw = *(ThreadWork *)threadwork;
     Rectangle *rectangle;
 
     while (queue_pop_front(tw.q, (void **)&rectangle) == 0)
@@ -34,7 +34,7 @@ void *thread_work_standard(void *threadwork)
 
 void calculate_mandelbrot_standard(Zoom zoom, uint16_t max_iterations, uint16_t *result, int thread_count, int lines_per_thread)
 {
-    int num_of_rects = zoom.height / lines_per_thread + (zoom.height % lines_per_thread != 0);
+    const int num_of_rects = zoom.height / lines_per_thread + (zoom.height % lines_per_thread != 0);
     Queue *q = queue_init();
 
     for (int r = 0; r < num_of_rects; r++)
@@ -42,8 +42,8 @@ void calculate_mandelbrot_standard(Zoom zoom, uint16_t max_iterations, uint16_t 
         Rectangle *rectangle = malloc(sizeof(Rectangle));
         if (rectangle != NULL)
         {
-            Point tl = (Point){0, r * lines_per_thread};
-            Point br = (Point){zoom.width - 1, min(tl.y + lines_per_thread, zoom.height)};
+            const Point tl = (Point){0, r * lines_per_thread};
+            const Point br = (Point){zoom.width - 1, min(tl.y + lines_per_thread, zoom.height)};
             *rectangle = (Rectangle){tl, br};
             queue_push_back(q, rectangle);
         }
@@ -53,7 +53,7 @@ void calculate_mandelbrot_standard(Zoom zoom, uint16_t max_iterations, uint16_t 
     ThreadWork tw = (ThreadWork){q, result, &zoom, max_iterations};
     for (int i = 0; i < thread_count; i++)
     {
-        pthread_create(&threads[i], NULL, thread_work_standard, (void *)&tw);
+        pthread_create(&threads[i], NULL, thread_work_standard, &tw);
     }
 
     for (int i = 0; i < thread_count; i++)
