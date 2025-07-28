@@ -3,17 +3,19 @@
 #include "mandelbrot_types.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include <tgmath.h>
 #include <time.h>
 #include <unistd.h>
 #include <stdint.h>
+#include <SDL.h>
 
-static inline void screen_to_complex(int screen_x, int screen_y, Zoom *zoom, double *real, double *imag)
+static void screen_to_complex(const int screen_x, const int screen_y, const Zoom *zoom, double *real, double *imag)
 {
     *real = (screen_x - zoom->width / 2.0) / zoom->factor + zoom->offset_x;
     *imag = (screen_y - zoom->height / 2.0) / zoom->factor + zoom->offset_y;
 }
 
-void init_palette(uint16_t max_iterations, Point_Color *palette)
+void init_palette(const uint16_t max_iterations, Point_Color *palette)
 {
     for (uint16_t i = 0; i <= max_iterations; ++i)
     {
@@ -23,13 +25,13 @@ void init_palette(uint16_t max_iterations, Point_Color *palette)
             continue;
         }
 
-        double t = (double)i / max_iterations;
+        const double t = (double)i / max_iterations;
 
-        float r = 0.5f + 0.5f * sin(3.0f + t * 12.0f);
-        float g = 0.5f + 0.5f * sin(2.1f + t * 12.0f);
-        float b = 0.5f + 0.5f * sin(1.0f + t * 12.0f);
+        float r = sin(3.0f + t * 12.0f) * 0.5f + 0.5f;
+        float g = sin(2.1f + t * 12.0f) * 0.5f + 0.5f;
+        float b = sin(1.0f + t * 12.0f) * 0.5f + 0.5f;
 
-        double brightness = pow(t, 0.3);
+        const float brightness = pow(t, 0.3);
         r *= brightness;
         g *= brightness;
         b *= brightness;
@@ -38,10 +40,10 @@ void init_palette(uint16_t max_iterations, Point_Color *palette)
     }
 }
 
-void render_mandelbrot(Graphics *gfx, Zoom *zoom, uint16_t max_iterations, Point_Color *palette, uint16_t thread_count, enum MandlebrotStrategy strategy)
+void render_mandelbrot(Graphics *gfx, const Zoom *zoom, const uint16_t max_iterations, const Point_Color *palette, uint16_t thread_count, enum MandlebrotStrategy strategy)
 {
-    int width = zoom->width;
-    int height = zoom->height;
+    const int width = zoom->width;
+    const int height = zoom->height;
 
     graphics_clear(gfx);
 
@@ -69,14 +71,14 @@ void render_mandelbrot(Graphics *gfx, Zoom *zoom, uint16_t max_iterations, Point
     free(result);
 }
 
-void render_mandelbrot_benchmark(Graphics *gfx, Zoom *zoom, uint16_t max_iterations, Point_Color *palette, int test_count, enum MandlebrotStrategy strategy)
+void render_mandelbrot_benchmark(Graphics *gfx, const Zoom *zoom, uint16_t max_iterations, const Point_Color *palette, int test_count, enum MandlebrotStrategy strategy)
 {
-    float best_time = 9999999;
+    double best_time = 9999999;
     int best_thread_count = 0;
-    float total_time = 0;
+    double total_time = 0;
 
-    int width = zoom->width;
-    int height = zoom->height;
+    const int width = zoom->width;
+    const int height = zoom->height;
 
     struct timespec start, end;
 
@@ -112,7 +114,7 @@ void render_mandelbrot_benchmark(Graphics *gfx, Zoom *zoom, uint16_t max_iterati
         graphics_present(gfx);
         // sleep(1);
         clock_gettime(CLOCK_MONOTONIC, &end);
-        float seconds = (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / 1e9;
+        const double seconds = (double)(end.tv_sec - start.tv_sec + end.tv_nsec - start.tv_nsec) / 1e9;
         total_time += seconds;
         if (seconds < best_time)
         {
@@ -206,8 +208,11 @@ int main()
                 case SDLK_ESCAPE:
                     quit = 1;
                     break;
+                default: ;
                 }
                 break;
+            default:
+                    break;;
             }
         }
 
