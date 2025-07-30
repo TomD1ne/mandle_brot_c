@@ -8,7 +8,7 @@
 typedef struct
 {
     Queue *q;
-    double *result;
+    long double *result;
     Zoom *zoom;
     uint16_t max_iterations;
 } ThreadWork;
@@ -32,7 +32,7 @@ void *thread_work_standard(void *threadwork)
     return NULL;
 }
 
-void calculate_mandelbrot_standard(Zoom zoom, uint16_t max_iterations, double *result, int thread_count, int lines_per_thread)
+void calculate_mandelbrot_standard(Zoom zoom, uint16_t max_iterations, long double *result, int thread_count, int lines_per_thread)
 {
     const int num_of_rects = zoom.height / lines_per_thread + (zoom.height % lines_per_thread != 0);
     Queue *q = queue_init();

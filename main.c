@@ -9,7 +9,7 @@
 #include <stdint.h>
 #include <SDL.h>
 
-static void screen_to_complex(const int screen_x, const int screen_y, const Zoom *zoom, double *real, double *imag)
+static void screen_to_complex(const int screen_x, const int screen_y, const Zoom *zoom, long double *real, long double *imag)
 {
     *real = (screen_x - zoom->width / 2.0) / zoom->factor + zoom->offset_x;
     *imag = (screen_y - zoom->height / 2.0) / zoom->factor + zoom->offset_y;
@@ -25,7 +25,7 @@ void init_palette(const uint16_t max_iterations, Point_Color *palette)
             continue;
         }
 
-        const double t = (double)i / max_iterations;
+        const long double t = (long double)i / max_iterations;
 
         float r = sin(3.0f + t * 12.0f) * 0.5f + 0.5f;
         float g = sin(2.1f + t * 12.0f) * 0.5f + 0.5f;
@@ -40,13 +40,13 @@ void init_palette(const uint16_t max_iterations, Point_Color *palette)
     }
 }
 
-static Point_Color calculate_color(const double iterations, const uint16_t max_iterations)
+static Point_Color calculate_color(const long double iterations, const uint16_t max_iterations)
 {
     if ((uint16_t)iterations == max_iterations)
     {
         return (Point_Color){0.0f, 0.0f, 0.0f, 1.0f};
     }
-    const double t = iterations / max_iterations;
+    const long double t = iterations / max_iterations;
 
     float r = sin(3.0f + t * 12.0f) * 0.5f + 0.5f;
     float g = sin(2.1f + t * 12.0f) * 0.5f + 0.5f;
@@ -67,7 +67,7 @@ void render_mandelbrot(Graphics *gfx, const Zoom *zoom, const uint16_t max_itera
 
     graphics_clear(gfx);
 
-    double *result = malloc(width * height * sizeof(double));
+    long double *result = malloc(width * height * sizeof(long double));
     if (!result)
     {
         fprintf(stderr, "Failed to allocate memory for Mandelbrot result.\n");
@@ -98,9 +98,9 @@ void render_mandelbrot(Graphics *gfx, const Zoom *zoom, const uint16_t max_itera
 
 void render_mandelbrot_benchmark(Graphics *gfx, const Zoom *zoom, uint16_t max_iterations, int test_count, enum MandelbrotStrategy strategy)
 {
-    double best_time = 9999999;
+    long double best_time = 9999999;
     int best_thread_count = 0;
-    double total_time = 0;
+    long double total_time = 0;
 
     const int width = zoom->width;
     const int height = zoom->height;
@@ -116,7 +116,7 @@ void render_mandelbrot_benchmark(Graphics *gfx, const Zoom *zoom, uint16_t max_i
 
         graphics_clear(gfx);
 
-        double *result = malloc(width * height * (sizeof(uint16_t)));
+        long double *result = malloc(width * height * (sizeof(uint16_t)));
         calculate_mandelbrot(*zoom, max_iterations, result, strategy, i);
 
         for (int y = 0; y < height; y++)
@@ -139,7 +139,7 @@ void render_mandelbrot_benchmark(Graphics *gfx, const Zoom *zoom, uint16_t max_i
         graphics_present(gfx);
         // sleep(1);
         clock_gettime(CLOCK_MONOTONIC, &end);
-        const double seconds = (double)(end.tv_sec - start.tv_sec + end.tv_nsec - start.tv_nsec) / 1e9;
+        const long double seconds = (long double)(end.tv_sec - start.tv_sec + end.tv_nsec - start.tv_nsec) / 1e9;
         total_time += seconds;
         if (seconds < best_time)
         {
@@ -198,7 +198,7 @@ int main()
             case SDL_MOUSEBUTTONDOWN:
                 if (e.button.button == SDL_BUTTON_LEFT)
                 {
-                    double click_real, click_imag;
+                    long double click_real, click_imag;
                     screen_to_complex(e.button.x, e.button.y, &zoom, &click_real, &click_imag);
 
                     zoom.offset_x = click_real;
@@ -208,7 +208,7 @@ int main()
                 }
                 else if (e.button.button == SDL_BUTTON_RIGHT)
                 {
-                    double click_real, click_imag;
+                    long double click_real, click_imag;
                     screen_to_complex(e.button.x, e.button.y, &zoom, &click_real, &click_imag);
 
                     zoom.offset_x = click_real;

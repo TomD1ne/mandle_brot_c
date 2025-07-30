@@ -2,26 +2,26 @@
 #include <stdint.h>
 #include <math.h>
 
-double mandelbrot_iterations(const Complex c, const uint16_t max_iterations)
+long double mandelbrot_iterations(const Complex c, const uint16_t max_iterations)
 {
     Complex z = {0.0, 0.0};
     uint16_t iterations = 0;
     while (z.real * z.real + z.imag * z.imag <= 4.0 && iterations < max_iterations)
     {
-        const double temp = z.real * z.real - z.imag * z.imag + c.real;
+        const long double temp = z.real * z.real - z.imag * z.imag + c.real;
         z.imag = 2.0 * z.real * z.imag + c.imag;
         z.real = temp;
 
         if (z.real * z.real + z.imag * z.imag > 4.0)
         {
-            double log_zn = log(z.real * z.real + z.imag * z.imag) / 2.0;
-            double nu = log(log_zn / log(2.0)) / log(2.0);
-            return (double)(iterations + 1) - nu;
+            long double log_zn = log(z.real * z.real + z.imag * z.imag) / 2.0;
+            long double nu = log(log_zn / log(2.0)) / log(2.0);
+            return (long double)(iterations + 1) - nu;
         }
         iterations++;
     }
 
-    return (double)iterations;
+    return (long double)iterations;
 }
 
 Complex calculate_complex(const int x, const int y, const Zoom *zoom)
@@ -32,7 +32,7 @@ Complex calculate_complex(const int x, const int y, const Zoom *zoom)
     return c;
 }
 
-void calculate_rect(const Rectangle rect, double *result, const Zoom *zoom, const uint16_t max_iterations)
+void calculate_rect(const Rectangle rect, long double *result, const Zoom *zoom, const uint16_t max_iterations)
 {
     for (int y = rect.tl.y; y < rect.br.y; y++)
     {
@@ -44,30 +44,30 @@ void calculate_rect(const Rectangle rect, double *result, const Zoom *zoom, cons
     }
 }
 
-void calculate_rect_with_period_check(const Rectangle rect, double *result, const Zoom *zoom, const uint16_t max_iterations)
+void calculate_rect_with_period_check(const Rectangle rect, long double *result, const Zoom *zoom, const uint16_t max_iterations)
 {
-    const double center_x = zoom->width / 2.0;
-    const double center_y = zoom->height / 2.0;
-    const double inv_factor = 1.0 / zoom->factor;
+    const long double center_x = zoom->width / 2.0;
+    const long double center_y = zoom->height / 2.0;
+    const long double inv_factor = 1.0 / zoom->factor;
 
     for (int y = rect.tl.y; y < rect.br.y; y++)
     {
-        const double c_imag = (y - center_y) * inv_factor + zoom->offset_y;
+        const long double c_imag = (y - center_y) * inv_factor + zoom->offset_y;
 
         for (int x = rect.tl.x; x < rect.br.x; x++)
         {
-            const double c_real = (x - center_x) * inv_factor + zoom->offset_x;
+            const long double c_real = (x - center_x) * inv_factor + zoom->offset_x;
 
-            double zr = 0.0, zi = 0.0;
-            double old_zr = 0.0, old_zi = 0.0;
-            double iter = 0;
-            double period = 1;
-            double check = 3;
+            long double zr = 0.0, zi = 0.0;
+            long double old_zr = 0.0, old_zi = 0.0;
+            long double iter = 0;
+            long double period = 1;
+            long double check = 3;
 
             while ((uint16_t)iter < max_iterations)
             {
-                double zr2 = zr * zr;
-                double zi2 = zi * zi;
+                long double zr2 = zr * zr;
+                long double zi2 = zi * zi;
 
                 if (zr2 + zi2 > 4.0)
                     break;
