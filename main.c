@@ -67,7 +67,7 @@ void render_mandelbrot(Graphics *gfx, const Zoom *zoom, const uint16_t max_itera
 
     graphics_clear(gfx);
 
-    double *result = malloc(width * height * (sizeof(double)));
+    double *result = malloc(width * height * sizeof(double));
     if (!result)
     {
         fprintf(stderr, "Failed to allocate memory for Mandelbrot result.\n");

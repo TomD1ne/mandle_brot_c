@@ -60,11 +60,11 @@ void calculate_rect_with_period_check(const Rectangle rect, double *result, cons
 
             double zr = 0.0, zi = 0.0;
             double old_zr = 0.0, old_zi = 0.0;
-            uint16_t iter = 0;
-            uint16_t period = 1;
-            uint16_t check = 3;
+            double iter = 0;
+            double period = 1;
+            double check = 3;
 
-            while (iter < max_iterations)
+            while ((uint16_t)iter < max_iterations)
             {
                 double zr2 = zr * zr;
                 double zi2 = zi * zi;
@@ -76,7 +76,8 @@ void calculate_rect_with_period_check(const Rectangle rect, double *result, cons
                 zr = zr2 - zi2 + c_real;
                 iter++;
 
-                if (iter == check)
+                // if (check - 0.05 >= iter && iter >= check + 0.05 )
+                if (check == iter)
                 {
                     if (zr == old_zr && zi == old_zi)
                     {

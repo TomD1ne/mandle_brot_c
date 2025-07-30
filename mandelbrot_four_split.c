@@ -46,11 +46,11 @@ static bool calculate_rect_border(const Rectangle rect, double *result, const Zo
     const Rectangle sw = (Rectangle){{rect.tl.x, rect.br.y}, {rect.br.x, rect.br.y + 1}};
     const Rectangle se = (Rectangle){{rect.br.x, rect.tl.y}, {rect.br.x + 1, rect.br.y}};
 
-    calculate_rect_with_period_check(nw, result, zoom, max_iterations);
-    calculate_rect_with_period_check(nw, result, zoom, max_iterations);
-    calculate_rect_with_period_check(ne, result, zoom, max_iterations);
-    calculate_rect_with_period_check(sw, result, zoom, max_iterations);
-    calculate_rect_with_period_check(se, result, zoom, max_iterations);
+    calculate_rect(nw, result, zoom, max_iterations);
+    calculate_rect(nw, result, zoom, max_iterations);
+    calculate_rect(ne, result, zoom, max_iterations);
+    calculate_rect(sw, result, zoom, max_iterations);
+    calculate_rect(se, result, zoom, max_iterations);
 
     const bool nw_black = rect_is_black(nw, result, zoom, max_iterations);
     const bool ne_black = rect_is_black(ne, result, zoom, max_iterations);
@@ -128,7 +128,7 @@ void *thread_work_four_split(void *threadwork)
         }
         else
         {
-            calculate_rect_with_period_check(*rectangle, tw.result, tw.zoom, tw.max_iterations);
+            calculate_rect(*rectangle, tw.result, tw.zoom, tw.max_iterations);
         }
         free(rectangle);
         pthread_mutex_lock(tw.sem_mutex);

@@ -59,15 +59,32 @@ set(SOURCES
 
 add_executable(mandelbrot ${SOURCES})
 
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Release)
+endif()
+
 target_compile_options(mandelbrot PRIVATE
         -Wall
         -Wextra
-        -pg
-        -O3
-        -ffast-math
-        -march=native
-        -mtune=native
 )
+
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    target_compile_options(mandelbrot PRIVATE
+            -g          # Debug symbols
+            -O0         # No optimization
+            -DDEBUG     # Define DEBUG macro
+    )
+elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
+    target_compile_options(mandelbrot PRIVATE
+            -O3
+            -DNDEBUG
+            -ffast-math
+            -march=native
+            -mtune=native
+            -pg         # Keep profiling for release
+    )
+    target_link_options(mandelbrot PRIVATE -pg)
+endif()
 
 target_include_directories(mandelbrot PRIVATE ${SDL2_INCLUDE_DIRS})
 
@@ -77,7 +94,5 @@ target_link_libraries(mandelbrot
         OpenGL::GL
         m
 )
-
-target_link_options(mandelbrot PRIVATE -pg)
 
 target_compile_definitions(mandelbrot PRIVATE ${SDL2_CFLAGS_OTHER})

@@ -25,7 +25,7 @@ void *thread_work_standard(void *threadwork)
 
     while (queue_pop_front(tw.q, (void **)&rectangle) == 0)
     {
-        calculate_rect_with_period_check(*rectangle, tw.result, tw.zoom, tw.max_iterations);
+        calculate_rect(*rectangle, tw.result, tw.zoom, tw.max_iterations);
         free(rectangle);
     }
 
