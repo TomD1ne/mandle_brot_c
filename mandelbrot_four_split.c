@@ -47,7 +47,6 @@ static bool calculate_rect_border(const Rectangle rect, double *result, const Zo
     const Rectangle se = (Rectangle){{rect.br.x, rect.tl.y}, {rect.br.x + 1, rect.br.y}};
 
     calculate_rect(nw, result, zoom, max_iterations);
-    calculate_rect(nw, result, zoom, max_iterations);
     calculate_rect(ne, result, zoom, max_iterations);
     calculate_rect(sw, result, zoom, max_iterations);
     calculate_rect(se, result, zoom, max_iterations);
@@ -146,7 +145,7 @@ void calculate_mandelbrot_four_split(Zoom zoom, const uint16_t max_iterations, d
     *sem = 0;
     pthread_mutex_init(&sem_mutex, NULL);
 
-    Rectangle init = (Rectangle){{-1, -1}, {zoom.width + 1, zoom.height + 1}};
+    Rectangle init = (Rectangle){{0, 0}, {zoom.width, zoom.height-1}};
     split_rect(q, init);
 
     pthread_t threads[thread_count];
