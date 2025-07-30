@@ -3,15 +3,15 @@
 
 typedef struct
 {
-    double real;
-    double imag;
+    long double real;
+    long double imag;
 } Complex;
 
 typedef struct
 {
-    double factor;
-    double offset_x;
-    double offset_y;
+    long double factor;
+    long double offset_x;
+    long double offset_y;
     int width;
     int height;
 } Zoom;

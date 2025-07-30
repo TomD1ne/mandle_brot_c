@@ -9,10 +9,94 @@
 #include <stdint.h>
 #include <SDL.h>
 
-static void screen_to_complex(const int screen_x, const int screen_y, const Zoom *zoom, double *real, double *imag)
+static void screen_to_complex(const int screen_x, const int screen_y, const Zoom *zoom, long double *real, long double *imag)
 {
     *real = (screen_x - zoom->width / 2.0) / zoom->factor + zoom->offset_x;
     *imag = (screen_y - zoom->height / 2.0) / zoom->factor + zoom->offset_y;
+}
+
+Point_Color hsv_to_rgb(float h, float s, float v, float a)
+{
+    float c = v * s;
+    float x = c * (1.0f - fabsf(fmodf(h / 60.0f, 2.0f) - 1.0f));
+    float m = v - c;
+
+    float r, g, b;
+    if (h < 60.0f)
+    {
+        r = c;
+        g = x;
+        b = 0;
+    }
+    else if (h < 120.0f)
+    {
+        r = x;
+        g = c;
+        b = 0;
+    }
+    else if (h < 180.0f)
+    {
+        r = 0;
+        g = c;
+        b = x;
+    }
+    else if (h < 240.0f)
+    {
+        r = 0;
+        g = x;
+        b = c;
+    }
+    else if (h < 300.0f)
+    {
+        r = x;
+        g = 0;
+        b = c;
+    }
+    else
+    {
+        r = c;
+        g = 0;
+        b = x;
+    }
+
+    return (Point_Color){r + m, g + m, b + m, a};
+}
+
+void init_palette_advanced(const uint16_t max_iterations, Point_Color *palette)
+{
+    for (uint16_t i = 0; i <= max_iterations; ++i)
+    {
+        if (i == max_iterations)
+        {
+            palette[i] = (Point_Color){0.0f, 0.0f, 0.0f, 1.0f};
+            continue;
+        }
+
+        const long double t = (long double)i / max_iterations;
+
+        float r = 0.5f + 0.25f * sinf(t * 3.14159f * 7.0f) +
+                  0.15f * sinf(t * 3.14159f * 13.0f) +
+                  0.1f * sinf(t * 3.14159f * 23.0f);
+
+        float g = 0.5f + 0.25f * sinf(t * 3.14159f * 11.0f + 2.1f) +
+                  0.15f * sinf(t * 3.14159f * 17.0f + 1.3f) +
+                  0.1f * sinf(t * 3.14159f * 29.0f + 0.7f);
+
+        float b = 0.5f + 0.25f * sinf(t * 3.14159f * 5.0f + 4.2f) +
+                  0.15f * sinf(t * 3.14159f * 19.0f + 3.8f) +
+                  0.1f * sinf(t * 3.14159f * 31.0f + 2.4f);
+
+        float spiral = sinf(t * 3.14159f * 20.0f) * expf(-t * 2.0f);
+        r += spiral * 0.2f;
+        g += spiral * 0.15f;
+        b += spiral * 0.1f;
+
+        r = fmaxf(0.0f, fminf(r, 1.0f));
+        g = fmaxf(0.0f, fminf(g, 1.0f));
+        b = fmaxf(0.0f, fminf(b, 1.0f));
+
+        palette[i] = (Point_Color){r, g, b, 1.0f};
+    }
 }
 
 void init_palette(const uint16_t max_iterations, Point_Color *palette)
@@ -25,7 +109,7 @@ void init_palette(const uint16_t max_iterations, Point_Color *palette)
             continue;
         }
 
-        const double t = (double)i / max_iterations;
+        const long double t = (long double)i / max_iterations;
 
         float r = sin(3.0f + t * 12.0f) * 0.5f + 0.5f;
         float g = sin(2.1f + t * 12.0f) * 0.5f + 0.5f;
@@ -73,9 +157,9 @@ void render_mandelbrot(Graphics *gfx, const Zoom *zoom, const uint16_t max_itera
 
 void render_mandelbrot_benchmark(Graphics *gfx, const Zoom *zoom, uint16_t max_iterations, const Point_Color *palette, int test_count, enum MandelbrotStrategy strategy)
 {
-    double best_time = 9999999;
+    long double best_time = 9999999;
     int best_thread_count = 0;
-    double total_time = 0;
+    long double total_time = 0;
 
     const int width = zoom->width;
     const int height = zoom->height;
@@ -114,7 +198,7 @@ void render_mandelbrot_benchmark(Graphics *gfx, const Zoom *zoom, uint16_t max_i
         graphics_present(gfx);
         // sleep(1);
         clock_gettime(CLOCK_MONOTONIC, &end);
-        const double seconds = (double)(end.tv_sec - start.tv_sec + end.tv_nsec - start.tv_nsec) / 1e9;
+        const long double seconds = (long double)(end.tv_sec - start.tv_sec + end.tv_nsec - start.tv_nsec) / 1e9;
         total_time += seconds;
         if (seconds < best_time)
         {
@@ -141,7 +225,7 @@ int main()
     const uint16_t MAX_ITERATIONS = 1000;
 
     Point_Color palette[MAX_ITERATIONS + 1];
-    init_palette(MAX_ITERATIONS, palette);
+    init_palette_advanced(MAX_ITERATIONS, palette);
 
     Graphics *gfx = graphics_init(WIDTH, HEIGHT, "Mandelbrot Set - Click to Zoom");
     if (!gfx)
@@ -176,7 +260,7 @@ int main()
             case SDL_MOUSEBUTTONDOWN:
                 if (e.button.button == SDL_BUTTON_LEFT)
                 {
-                    double click_real, click_imag;
+                    long double click_real, click_imag;
                     screen_to_complex(e.button.x, e.button.y, &zoom, &click_real, &click_imag);
 
                     zoom.offset_x = click_real;
@@ -186,7 +270,7 @@ int main()
                 }
                 else if (e.button.button == SDL_BUTTON_RIGHT)
                 {
-                    double click_real, click_imag;
+                    long double click_real, click_imag;
                     screen_to_complex(e.button.x, e.button.y, &zoom, &click_real, &click_imag);
 
                     zoom.offset_x = click_real;
@@ -208,11 +292,12 @@ int main()
                 case SDLK_ESCAPE:
                     quit = 1;
                     break;
-                default: ;
+                default:;
                 }
                 break;
             default:
-                    break;;
+                break;
+                ;
             }
         }
 

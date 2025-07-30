@@ -1,6 +1,6 @@
 #include "mandelbrot_iteration.h"
 #ifdef __APPLE__
-    #include <arm_neon.h>
+#include <arm_neon.h>
 #endif
 #include <stdint.h>
 
@@ -10,7 +10,7 @@ uint16_t mandelbrot_iterations(const Complex c, const uint16_t max_iterations)
     uint16_t iterations = 0;
     while (z.real * z.real + z.imag * z.imag <= 4.0 && iterations < max_iterations)
     {
-        const double temp = z.real * z.real - z.imag * z.imag + c.real;
+        const long double temp = z.real * z.real - z.imag * z.imag + c.real;
         z.imag = 2.0 * z.real * z.imag + c.imag;
         z.real = temp;
         iterations++;
@@ -42,9 +42,9 @@ void calculate_rect(const Rectangle rect, uint16_t *result, const Zoom *zoom, co
 #ifdef __APPLE__
 void calculate_rect_simd_neon_double(const Rectangle rect, uint16_t *result, Zoom *zoom, const uint16_t max_iterations)
 {
-    const double center_x = zoom->width / 2.0;
-    const double center_y = zoom->height / 2.0;
-    const double inv_factor = 1.0 / zoom->factor;
+    const long double center_x = zoom->width / 2.0;
+    const long double center_y = zoom->height / 2.0;
+    const long double inv_factor = 1.0 / zoom->factor;
 
     const float64x2_t vinv_factor = vdupq_n_f64(inv_factor);
     const float64x2_t voffset_x = vdupq_n_f64(zoom->offset_x);
@@ -56,14 +56,14 @@ void calculate_rect_simd_neon_double(const Rectangle rect, uint16_t *result, Zoo
 
     for (int y = rect.tl.y; y < rect.br.y; y++)
     {
-        const float64x2_t vy = vdupq_n_f64((double)y);
+        const float64x2_t vy = vdupq_n_f64((long double)y);
         const float64x2_t c_imag = vfmaq_f64(voffset_y, vsubq_f64(vy, vcenter_y), vinv_factor);
 
         int x = rect.tl.x;
 
         for (; x <= rect.br.x - 2; x += 2)
         {
-            const double x_vals[2] = {(double)x, (double)(x + 1)};
+            const long double x_vals[2] = {(long double)x, (long double)(x + 1)};
             const float64x2_t vx = vld1q_f64(x_vals);
             const float64x2_t c_real = vfmaq_f64(voffset_x, vsubq_f64(vx, vcenter_x), vinv_factor);
 
@@ -112,28 +112,28 @@ void calculate_rect_simd_neon_double(const Rectangle rect, uint16_t *result, Zoo
 
 void calculate_rect_with_period_check(const Rectangle rect, uint16_t *result, const Zoom *zoom, const uint16_t max_iterations)
 {
-    const double center_x = zoom->width / 2.0;
-    const double center_y = zoom->height / 2.0;
-    const double inv_factor = 1.0 / zoom->factor;
+    const long double center_x = zoom->width / 2.0;
+    const long double center_y = zoom->height / 2.0;
+    const long double inv_factor = 1.0 / zoom->factor;
 
     for (int y = rect.tl.y; y < rect.br.y; y++)
     {
-        const double c_imag = (y - center_y) * inv_factor + zoom->offset_y;
+        const long double c_imag = (y - center_y) * inv_factor + zoom->offset_y;
 
         for (int x = rect.tl.x; x < rect.br.x; x++)
         {
-            const double c_real = (x - center_x) * inv_factor + zoom->offset_x;
+            const long double c_real = (x - center_x) * inv_factor + zoom->offset_x;
 
-            double zr = 0.0, zi = 0.0;
-            double old_zr = 0.0, old_zi = 0.0;
+            long double zr = 0.0, zi = 0.0;
+            long double old_zr = 0.0, old_zi = 0.0;
             uint16_t iter = 0;
             uint16_t period = 1;
             uint16_t check = 3;
 
             while (iter < max_iterations)
             {
-                double zr2 = zr * zr;
-                double zi2 = zi * zi;
+                long double zr2 = zr * zr;
+                long double zi2 = zi * zi;
 
                 if (zr2 + zi2 > 4.0)
                     break;
